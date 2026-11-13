@@ -33,11 +33,12 @@ target_link_libraries(ticket_reservation
 if(BUILD_TESTING)
 
     find_package(GTest REQUIRED)
-
     add_executable(user_tests
-        tests/unit/UserTest.cpp
-        src/domain/User.cpp
-    )
+    tests/unit/UserTest.cpp
+    src/domain/User.cpp
+    tests/unit/EventTest.cpp
+    src/domain/Event.cpp
+)
 
     target_link_libraries(user_tests
         PRIVATE

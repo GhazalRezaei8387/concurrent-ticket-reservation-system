@@ -5,6 +5,8 @@ project(ConcurrentTicketReservationSystem
     LANGUAGES CXX
 )
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -26,3 +28,23 @@ target_link_libraries(ticket_reservation
         PostgreSQL::PostgreSQL
         PkgConfig::PQXX
 )
+
+# Unit Tests
+if(BUILD_TESTING)
+
+    find_package(GTest REQUIRED)
+
+    add_executable(user_tests
+        tests/unit/UserTest.cpp
+        src/domain/User.cpp
+    )
+
+    target_link_libraries(user_tests
+        PRIVATE
+            GTest::gtest_main
+    )
+
+    include(GoogleTest)
+    gtest_discover_tests(user_tests)
+
+endif()

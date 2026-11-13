@@ -34,10 +34,14 @@ if(BUILD_TESTING)
 
     find_package(GTest REQUIRED)
     add_executable(user_tests
-    tests/unit/UserTest.cpp
-    src/domain/User.cpp
-    tests/unit/EventTest.cpp
-    src/domain/Event.cpp
+        tests/unit/UserTest.cpp
+        src/domain/User.cpp
+
+        tests/unit/EventTest.cpp
+        src/domain/Event.cpp
+
+        tests/unit/SeatTest.cpp
+        src/domain/Seat.cpp
 )
 
     target_link_libraries(user_tests

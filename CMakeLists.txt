@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.20)
 
 project(ConcurrentTicketReservationSystem
@@ -14,6 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PQXX REQUIRED IMPORTED_TARGET libpqxx)
 find_package(PostgreSQL REQUIRED)
+
 # Include project headers
 include_directories(include)
 
@@ -21,6 +23,8 @@ include_directories(include)
 add_executable(ticket_reservation
     src/main.cpp
     src/database/DatabaseConnection.cpp
+    src/domain/User.cpp
+    src/repositories/UserRepository.cpp
 )
 
 target_link_libraries(ticket_reservation
@@ -29,31 +33,49 @@ target_link_libraries(ticket_reservation
         PkgConfig::PQXX
 )
 
-# Unit Tests
+# Tests
 if(BUILD_TESTING)
 
     find_package(GTest REQUIRED)
-    
-add_executable(user_tests
-    tests/unit/UserTest.cpp
-    src/domain/User.cpp
+    include(GoogleTest)
 
-    tests/unit/EventTest.cpp
-    src/domain/Event.cpp
+    # Unit Tests
+    add_executable(user_tests
+        tests/unit/UserTest.cpp
+        src/domain/User.cpp
 
-    tests/unit/SeatTest.cpp
-    src/domain/Seat.cpp
+        tests/unit/EventTest.cpp
+        src/domain/Event.cpp
 
-    tests/unit/ReservationTest.cpp
-    src/domain/Reservation.cpp
-)
+        tests/unit/SeatTest.cpp
+        src/domain/Seat.cpp
+
+        tests/unit/ReservationTest.cpp
+        src/domain/Reservation.cpp
+    )
 
     target_link_libraries(user_tests
         PRIVATE
             GTest::gtest_main
     )
 
-    include(GoogleTest)
     gtest_discover_tests(user_tests)
+
+    # Integration Tests
+    add_executable(user_repository_tests
+        tests/integration/UserRepositoryTest.cpp
+        src/database/DatabaseConnection.cpp
+        src/domain/User.cpp
+        src/repositories/UserRepository.cpp
+    )
+
+    target_link_libraries(user_repository_tests
+        PRIVATE
+            GTest::gtest_main
+            PostgreSQL::PostgreSQL
+            PkgConfig::PQXX
+    )
+
+    gtest_discover_tests(user_repository_tests)
 
 endif()

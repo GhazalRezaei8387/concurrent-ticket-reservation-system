@@ -25,8 +25,10 @@ add_executable(ticket_reservation
     src/database/DatabaseConnection.cpp
     src/domain/User.cpp
     src/domain/Event.cpp
+    src/domain/Seat.cpp
     src/repositories/UserRepository.cpp
     src/repositories/EventRepository.cpp
+    src/repositories/SeatRepository.cpp
 )
 
 target_link_libraries(ticket_reservation
@@ -75,6 +77,10 @@ if(BUILD_TESTING)
 
         src/repositories/UserRepository.cpp
         src/repositories/EventRepository.cpp
+
+        tests/integration/SeatRepositoryTest.cpp
+        src/domain/Seat.cpp
+        src/repositories/SeatRepository.cpp
     )
 
     target_link_libraries(user_repository_tests

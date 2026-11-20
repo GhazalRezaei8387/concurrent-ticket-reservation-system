@@ -63,11 +63,13 @@ std::vector<Seat> SeatRepository::findByEventId(std::int64_t eventId) {
     pqxx::read_transaction transaction(database_.getConnection());
 
     pqxx::result result = transaction.exec_params(
-        "SELECT seat_id, event_id, seat_number, seat_type "
-        "FROM seats "
-        "WHERE event_id = $1 "
-        "ORDER BY seat_number ASC;",
-        eventId
+    "SELECT seat_id, event_id, seat_number, seat_type "
+    "FROM seats "
+    "WHERE event_id = $1 "
+    "ORDER BY "
+    "substring(seat_number from '^[A-Za-z]+') ASC, "
+    "substring(seat_number from '[0-9]+$')::BIGINT ASC;",
+    eventId
     );
 
     std::vector<Seat> seats;

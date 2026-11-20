@@ -121,3 +121,32 @@ TEST_F(SeatRepositoryTest, FindAllSeatsByEventId) {
         EXPECT_EQ(seat.getEventId(), eventId);
     }
 }
+
+
+TEST_F(SeatRepositoryTest, SortsSeatsNaturallyBySeatNumber) {
+    const std::int64_t eventId = createTestEvent();
+
+    seatRepository->create(eventId, "B10", "Regular");
+    seatRepository->create(eventId, "A10", "Regular");
+    seatRepository->create(eventId, "B2", "Regular");
+    seatRepository->create(eventId, "A2", "Regular");
+    seatRepository->create(eventId, "A1", "VIP");
+    seatRepository->create(eventId, "B1", "Regular");
+
+    const auto seats = seatRepository->findByEventId(eventId);
+
+    ASSERT_EQ(seats.size(), 6);
+
+    const std::vector<std::string> expectedOrder = {
+        "A1",
+        "A2",
+        "A10",
+        "B1",
+        "B2",
+        "B10"
+    };
+
+    for (std::size_t i = 0; i < expectedOrder.size(); ++i) {
+        EXPECT_EQ(seats[i].getSeatNumber(), expectedOrder[i]);
+    }
+}

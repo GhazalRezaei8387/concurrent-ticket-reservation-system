@@ -23,9 +23,12 @@ include_directories(include)
 add_executable(ticket_reservation
     src/main.cpp
     src/database/DatabaseConnection.cpp
+
     src/domain/User.cpp
     src/domain/Event.cpp
     src/domain/Seat.cpp
+    src/domain/Reservation.cpp
+
     src/repositories/UserRepository.cpp
     src/repositories/EventRepository.cpp
     src/repositories/SeatRepository.cpp
@@ -69,17 +72,16 @@ if(BUILD_TESTING)
     add_executable(user_repository_tests
         tests/integration/UserRepositoryTest.cpp
         tests/integration/EventRepositoryTest.cpp
+        tests/integration/SeatRepositoryTest.cpp
 
         src/database/DatabaseConnection.cpp
 
         src/domain/User.cpp
         src/domain/Event.cpp
+        src/domain/Seat.cpp
 
         src/repositories/UserRepository.cpp
         src/repositories/EventRepository.cpp
-
-        tests/integration/SeatRepositoryTest.cpp
-        src/domain/Seat.cpp
         src/repositories/SeatRepository.cpp
     )
 

@@ -2,14 +2,9 @@
 #define EVENT_REPOSITORY_HPP
 
 #include "database/DatabaseConnection.hpp"
-#include "domain/Event.hpp"
+#include "repositories/IEventRepository.hpp"
 
-#include <cstdint>
-#include <optional>
-#include <string>
-#include <vector>
-
-class EventRepository {
+class EventRepository : public IEventRepository {
 public:
     explicit EventRepository(DatabaseConnection& database);
 
@@ -18,11 +13,13 @@ public:
         const std::string& description,
         const std::string& location,
         std::chrono::system_clock::time_point eventDate
-    );
+    ) override;
 
-    std::optional<Event> findById(std::int64_t eventId);
+    std::optional<Event> findById(
+        std::int64_t eventId
+    ) override;
 
-    std::vector<Event> findAll();
+    std::vector<Event> findAll() override;
 
 private:
     DatabaseConnection& database_;

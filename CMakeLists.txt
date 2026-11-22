@@ -60,6 +60,12 @@ if(BUILD_TESTING)
 
         tests/unit/ReservationTest.cpp
         src/domain/Reservation.cpp
+
+        tests/unit/UserServiceTest.cpp
+        src/services/UserService.cpp
+
+        tests/unit/EventServiceTest.cpp
+        src/services/EventService.cpp
     )
 
     target_link_libraries(user_tests

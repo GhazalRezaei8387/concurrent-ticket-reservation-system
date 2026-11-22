@@ -66,6 +66,9 @@ if(BUILD_TESTING)
 
         tests/unit/EventServiceTest.cpp
         src/services/EventService.cpp
+
+        tests/unit/SeatServiceTest.cpp
+        src/services/SeatService.cpp
     )
 
     target_link_libraries(user_tests

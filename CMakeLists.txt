@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.20)
 
 project(ConcurrentTicketReservationSystem
@@ -69,6 +68,9 @@ if(BUILD_TESTING)
 
         tests/unit/SeatServiceTest.cpp
         src/services/SeatService.cpp
+        
+        tests/unit/ReservationServiceTest.cpp
+        src/services/ReservationService.cpp
     )
 
     target_link_libraries(user_tests

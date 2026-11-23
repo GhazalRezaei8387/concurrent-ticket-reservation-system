@@ -1,4 +1,8 @@
+
 #include "repositories/ReservationRepository.hpp"
+
+#include <stdexcept>
+#include <string>
 
 ReservationRepository::ReservationRepository(DatabaseConnection& database)
     : database_(database) {
@@ -225,3 +229,33 @@ std::optional<Reservation> ReservationRepository::findActiveBySeatId(
     );
 }
 
+void ReservationRepository::cancel(
+    std::int64_t reservationId,
+    std::chrono::system_clock::time_point cancellationTime
+) {
+    pqxx::work transaction(database_.getConnection());
+
+    const auto cancellationTimeEpoch =
+        std::chrono::duration<double>(
+            cancellationTime.time_since_epoch()
+        ).count();
+
+    auto result = transaction.exec_params(
+        "UPDATE reservations "
+        "SET status = 'CANCELLED', "
+        "cancelled_at = TO_TIMESTAMP($2) "
+        "WHERE reservation_id = $1 "
+        "AND status = 'CONFIRMED' "
+        "RETURNING reservation_id",
+        reservationId,
+        cancellationTimeEpoch
+    );
+
+    if (result.empty()) {
+        throw std::runtime_error(
+            "Reservation not found or already cancelled."
+        );
+    }
+
+    transaction.commit();
+}

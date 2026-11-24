@@ -229,3 +229,124 @@ TEST_F(ReservationRepositoryTest, FindActiveReservationBySeatId) {
 
     EXPECT_FALSE(activeReservation->getCancelledAt().has_value());
 }
+
+
+// Test 6: Cancel Reservation
+TEST_F(ReservationRepositoryTest, CancelReservation) {
+    const std::int64_t userId = createTestUser();
+    const std::int64_t seatId = createTestSeat();
+
+    Reservation reservation =
+        reservationRepository->create(userId, seatId);
+
+    const auto cancellationTime =
+        std::chrono::system_clock::now();
+
+    reservationRepository->cancel(
+        reservation.getReservationId(),
+        cancellationTime
+    );
+
+    const auto cancelledReservation =
+        reservationRepository->findById(
+            reservation.getReservationId()
+        );
+
+    ASSERT_TRUE(cancelledReservation.has_value());
+
+    EXPECT_EQ(
+        cancelledReservation->getStatus(),
+        ReservationStatus::Cancelled
+    );
+
+    ASSERT_TRUE(
+        cancelledReservation->getCancelledAt().has_value()
+    );
+
+    const auto timeDifference =
+    cancelledReservation->getCancelledAt().value() -
+    cancellationTime;
+
+    EXPECT_LT(
+        std::chrono::abs(timeDifference),
+        std::chrono::milliseconds(1)
+    ); 
+    
+}
+
+// Test 7: Cancelled Reservation Remains In User History
+TEST_F(
+    ReservationRepositoryTest,
+    CancelledReservationRemainsInUserHistory
+) {
+    const std::int64_t userId = createTestUser();
+    const std::int64_t seatId = createTestSeat();
+
+    Reservation reservation =
+        reservationRepository->create(userId, seatId);
+
+    reservationRepository->cancel(
+        reservation.getReservationId(),
+        std::chrono::system_clock::now()
+    );
+
+    const auto history =
+        reservationRepository->findByUserId(userId);
+
+    ASSERT_EQ(history.size(), 1);
+
+    EXPECT_EQ(
+        history[0].getReservationId(),
+        reservation.getReservationId()
+    );
+
+    EXPECT_EQ(
+        history[0].getStatus(),
+        ReservationStatus::Cancelled
+    );
+}
+
+// Test 8: Allows New Reservation After Cancellation
+TEST_F(
+    ReservationRepositoryTest,
+    AllowsNewReservationAfterCancellation
+) {
+    const std::int64_t userId = createTestUser();
+    const std::int64_t seatId = createTestSeat();
+
+    Reservation firstReservation =
+        reservationRepository->create(userId, seatId);
+
+    reservationRepository->cancel(
+        firstReservation.getReservationId(),
+        std::chrono::system_clock::now()
+    );
+
+    const auto activeReservation =
+        reservationRepository->findActiveBySeatId(seatId);
+
+    EXPECT_FALSE(activeReservation.has_value());
+
+    Reservation secondReservation =
+        reservationRepository->create(userId, seatId);
+
+    EXPECT_NE(
+        firstReservation.getReservationId(),
+        secondReservation.getReservationId()
+    );
+
+    const auto newActiveReservation =
+        reservationRepository->findActiveBySeatId(seatId);
+
+    ASSERT_TRUE(newActiveReservation.has_value());
+
+    EXPECT_EQ(
+        newActiveReservation->getReservationId(),
+        secondReservation.getReservationId()
+    );
+
+    EXPECT_EQ(
+        newActiveReservation->getStatus(),
+        ReservationStatus::Confirmed
+    );
+}

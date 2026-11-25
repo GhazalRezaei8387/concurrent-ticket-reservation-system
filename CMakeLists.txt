@@ -82,6 +82,7 @@ if(BUILD_TESTING)
 
     # Integration Tests
     add_executable(user_repository_tests
+        tests/integration/ServiceIntegrationTest.cpp
         tests/integration/UserRepositoryTest.cpp
         tests/integration/EventRepositoryTest.cpp
         tests/integration/SeatRepositoryTest.cpp
@@ -98,6 +99,11 @@ if(BUILD_TESTING)
         src/repositories/EventRepository.cpp
         src/repositories/SeatRepository.cpp
         src/repositories/ReservationRepository.cpp
+
+        src/services/UserService.cpp
+        src/services/EventService.cpp
+        src/services/SeatService.cpp
+        src/services/ReservationService.cpp
     )
 
     target_link_libraries(user_repository_tests

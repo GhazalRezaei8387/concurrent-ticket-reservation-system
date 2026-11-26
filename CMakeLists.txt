@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.20)
 
 project(ConcurrentTicketReservationSystem
@@ -14,6 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PQXX REQUIRED IMPORTED_TARGET libpqxx)
 find_package(PostgreSQL REQUIRED)
+find_package(Threads REQUIRED)
 
 # Include project headers
 include_directories(include)
@@ -38,6 +40,7 @@ target_link_libraries(ticket_reservation
     PRIVATE
         PostgreSQL::PostgreSQL
         PkgConfig::PQXX
+        Threads::Threads
 )
 
 # Tests
@@ -68,14 +71,18 @@ if(BUILD_TESTING)
 
         tests/unit/SeatServiceTest.cpp
         src/services/SeatService.cpp
-        
+
         tests/unit/ReservationServiceTest.cpp
         src/services/ReservationService.cpp
+
+        tests/unit/SeatLockManagerTest.cpp
+        src/concurrency/SeatLockManager.cpp
     )
 
     target_link_libraries(user_tests
         PRIVATE
             GTest::gtest_main
+            Threads::Threads
     )
 
     gtest_discover_tests(user_tests)
@@ -111,6 +118,7 @@ if(BUILD_TESTING)
             GTest::gtest_main
             PostgreSQL::PostgreSQL
             PkgConfig::PQXX
+            Threads::Threads
     )
 
     gtest_discover_tests(user_repository_tests)

@@ -4,6 +4,10 @@
 
 #include <stdexcept>
 
+#include <atomic>
+#include <thread>
+#include <vector>
+
 TEST(SeatLockManagerTest, ReturnsLockForValidSeat) {
     SeatLockManager manager;
 
@@ -42,4 +46,77 @@ TEST(SeatLockManagerTest, RejectsInvalidSeatId) {
         manager.getLockForSeat(-1),
         std::invalid_argument
     );
+}
+
+TEST(SeatLockManagerTest, PreventsConcurrentAccessToSameSeat) {
+    SeatLockManager manager;
+
+    const int threadCount = 5;
+
+    auto seatLock = manager.getLockForSeat(101);
+
+    int activeThreads = 0;
+    std::atomic<bool> concurrentAccessDetected{false};
+
+    std::vector<std::thread> workers;
+
+    for (int i = 0; i < threadCount; ++i) {
+        workers.emplace_back([&]() {
+            std::lock_guard<std::mutex> lock(*seatLock);
+
+            activeThreads++;
+
+            if (activeThreads > 1) {
+                concurrentAccessDetected = true;
+            }
+
+            activeThreads--;
+        });
+    }
+
+    for (auto& worker : workers) {
+        worker.join();
+    }
+
+    EXPECT_FALSE(concurrentAccessDetected.load());
+}
+
+TEST(SeatLockManagerTest, UniqueLockCanUnlockAndLockAgain) {
+    std::mutex mutex;
+
+    std::unique_lock<std::mutex> lock(mutex);
+
+    EXPECT_TRUE(lock.owns_lock());
+
+    lock.unlock();
+
+    EXPECT_FALSE(lock.owns_lock());
+
+    lock.lock();
+
+    EXPECT_TRUE(lock.owns_lock());
+}
+
+TEST(SeatLockManagerTest, AllowsConcurrentAccessToDifferentSeats) {
+    SeatLockManager manager;
+
+    auto firstSeatLock = manager.getLockForSeat(101);
+    auto secondSeatLock = manager.getLockForSeat(102);
+
+    std::atomic<int> completedCount{0};
+
+    std::thread firstThread([&]() {
+        std::lock_guard<std::mutex> lock(*firstSeatLock);
+        completedCount++;
+    });
+
+    std::thread secondThread([&]() {
+        std::lock_guard<std::mutex> lock(*secondSeatLock);
+        completedCount++;
+    });
+
+    firstThread.join();
+    secondThread.join();
+
+    EXPECT_EQ(completedCount.load(), 2);
 }

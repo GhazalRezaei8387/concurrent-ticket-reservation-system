@@ -77,6 +77,8 @@ if(BUILD_TESTING)
 
         tests/unit/SeatLockManagerTest.cpp
         src/concurrency/SeatLockManager.cpp
+
+        tests/unit/ThreadTest.cpp
     )
 
     target_link_libraries(user_tests
